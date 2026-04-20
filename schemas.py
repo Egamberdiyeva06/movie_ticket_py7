@@ -1,30 +1,40 @@
 from pydantic import BaseModel, Field
-
-class TicketCreate(BaseModel):
-    movie_name: str = Field(max_length=200)
-    seat_number: int = Field(ge=1, le=50)
-    customer_name: str = Field(max_length=100)
-    is_vip: bool = False
+from typing import Literal
 
 
-class TicketOut(BaseModel):
-    id: int = Field(ge=1)
-    movie_name: str = Field(max_length=200)
-    seat_number: int = Field(ge=1, le=50)
-    customer_name: str = Field(max_length=100)
-    is_vip: bool = False
-    price: float = Field(default=0)
+class UserBase(BaseModel):
+    first_name: str = Field(max_length=200)
+    last_name: str = Field(max_length=200)
+    role: Literal["admin", 'user'] = 'user'
 
-    class Config:
+
+class UserCreate(UserBase):
+    password: str = Field(min_length=4, max_length=50)
+
+
+class UserOut(UserBase):
+    id: int
+    tickets: list["TicketOut"] = []
+
+    class Config: 
         from_attributes = True
 
-class TicketGet(BaseModel):
-    id: int
-    movie_name: str
-    seat_number: int
-    customer_name: str
-    is_vip: bool
-    price: float
+
+class TicketBase(BaseModel):
+    movie_name: str = Field(max_length=200)
+    customer_name: str = Field(max_length=100)
+    seat_number: int = Field(ge=1, le=50)
+    is_vip: bool = False
+
+
+class TicketCreate(TicketBase):
+    pass
+
+
+class TicketOut(TicketBase):
+    id: int = Field(ge=1)
+    price: float = Field(default=0)
+    user_id: int
 
     class Config:
         from_attributes = True
